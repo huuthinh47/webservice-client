@@ -1,0 +1,22 @@
+{
+    "name": "vietnamworks/webservice-client",
+    "description": "VietnamWorks Webservice Client PHP Library",
+    "require": {
+        "php": "^7.1||^8.0",
+        "php-http/guzzle6-adapter": "^2.0",
+        "php-http/httplug": "^2.0",
+        "guzzlehttp/guzzle": "^6.0"
+    },
+    "autoload": {
+        "psr-0" : {
+            "VietnamWorks" : "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "vietnamworks",
+            "email": "thinh.trinh@navigosgroup.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
