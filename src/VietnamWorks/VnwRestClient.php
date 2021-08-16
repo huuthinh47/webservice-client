@@ -12,6 +12,7 @@ namespace VietnamWorks;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use Http\Client\HttpClient;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\ResponseInterface;
 use VietnamWorks\Constants\ExceptionMessages;
@@ -72,7 +73,7 @@ class VnwRestClient
      * @param $apiHost
      * @param HttpClient|null $httpClient
      */
-    public function __construct($apiKey, $apiSecret, $apiHost, HttpClient $httpClient = null)
+    public function __construct($apiKey, $apiSecret, $apiHost, HttpClientInterface $httpClient = null)
     {
         $this->apiKey = $apiKey;
         $this->apiSecret = $apiSecret;
