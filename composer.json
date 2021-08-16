@@ -10,7 +10,7 @@
     },
     "autoload": {
         "psr-4" : {
-            "VietnamWorks\\" : "src/"
+            "VietnamWorks\\" : "src/VietnamWorks"
         }
     },
     "authors": [

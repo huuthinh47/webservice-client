@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: khoalengoc
- * Date: 6/7/16
- * Time: 11:39 AM
- */
 
 namespace VietnamWorks;
-
 
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
@@ -21,6 +14,7 @@ use VietnamWorks\Exceptions\GenericHTTPError;
 use VietnamWorks\Exceptions\InvalidCredentials;
 use VietnamWorks\Exceptions\MissingEndpoint;
 use VietnamWorks\Exceptions\MissingRequiredParameters;
+use VietnamWorks\TokenStorageInterface;
 
 class VnwRestClient
 {
