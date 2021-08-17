@@ -101,7 +101,7 @@ class VnwRestClient
         }
 
         $request = new Request($method, $this->getApiUrl($uri), $headers, $body);
-        $response = $this->getHttpClient()->sendRequest($request);
+        $response = $this->getHttpClient()->request($request);
 
         return $this->responseHandler($response);
     }
