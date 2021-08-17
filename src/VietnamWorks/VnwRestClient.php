@@ -8,6 +8,7 @@ use Http\Client\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpClient\Response\TraceableResponse;
 use VietnamWorks\Constants\ExceptionMessages;
 use VietnamWorks\Exceptions\ExpiredToken;
 use VietnamWorks\Exceptions\GenericHTTPError;
@@ -91,17 +92,24 @@ class VnwRestClient
      */
     public function send($method, $uri, $accessToken='', $body = null, $headers = array(),$files=array())
     {
+        $client = $this->getHttpClient();
         if (!empty($accessToken)) {
-            $headers['Authorization'] = 'Bearer '. $accessToken;
+            $client->withOptions([
+                'headers' => ['Authorization' => 'Bearer '. $accessToken]
+            ]);
         }
 
         if (!empty($files)) {
             $body = new MultipartStream($files);
-            $headers['Content-Type'] = 'multipart/form-data; boundary='.$body->getBoundary();
+            $client->withOptions([
+                'headers' => ['Content-Type' => 'multipart/form-data; boundary='.$body->getBoundary()]
+            ]);
         }
 
-        $request = new Request($method, $this->getApiUrl($uri), $headers, $body);
-        $response = $this->getHttpClient()->request($request);
+        $response = $client->request(
+            $method,
+            $this->getApiUrl($uri)
+        );
 
         return $this->responseHandler($response);
     }
@@ -169,11 +177,11 @@ class VnwRestClient
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      */
-    private function responseHandler(ResponseInterface $response)
+    private function responseHandler(TraceableResponse $response)
     {
         $httpResponseCode = $response->getStatusCode();
         $result = new \stdClass();
-        $data = (string)$response->getBody();
+        $data = (string)$response->getContent();
         $jsonResponseData = json_decode($data, false);
 
         if ($httpResponseCode == 200) {
@@ -301,6 +309,5 @@ class VnwRestClient
     {
         $this->tokenStorage = $tokenStorage;
     }
-
 
 }

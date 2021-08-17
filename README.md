@@ -1,2 +1,2 @@
 # webservice-client
-Demo-webservice-client 123456
+Demo-webservice-client
