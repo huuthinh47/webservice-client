@@ -3,10 +3,8 @@
 namespace VietnamWorks;
 
 use GuzzleHttp\Psr7\MultipartStream;
-use GuzzleHttp\Psr7\Request;
 use Http\Client\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpClient\Response\TraceableResponse;
 use VietnamWorks\Constants\ExceptionMessages;
@@ -59,7 +57,7 @@ class VnwRestClient
     /**
      * @var null
      */
-    protected $tokenStorage=null;
+    protected $tokenStorage = null;
 
 
     /**
@@ -90,27 +88,29 @@ class VnwRestClient
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      */
-    public function send($method, $uri, $accessToken='', $body = null, $headers = array(),$files=array())
+    public function send($method, $uri, $accessToken = '', $body = null, $headers = array(), $files = array())
     {
+        $options = [];
         $client = $this->getHttpClient();
         if (!empty($accessToken)) {
-            $client->withOptions([
-                'headers' => ['Authorization' => 'Bearer '. $accessToken]
-            ]);
+            $options['auth_bearer'] = $accessToken;
         }
 
-        if (!empty($files)) {
-            $body = new MultipartStream($files);
-            $client->withOptions([
-                'headers' => ['Content-Type' => 'multipart/form-data; boundary='.$body->getBoundary()]
-            ]);
-        }
+        // if (!empty($files)) {
+        //     $body = new MultipartStream($files);
+        //     $headers = array_merge($headers, ['Content-Type' => 'multipart/form-data; boundary=' . $body->getBoundary()]);
+        // }
+
+        $client->withOptions([
+            'headers' => $headers
+        ]);
 
         $response = $client->request(
             $method,
-            $this->getApiUrl($uri)
+            $this->getApiUrl($uri),
+            $options
         );
-
+        $data = (string)$response->getContent();
         return $this->responseHandler($response);
     }
 
@@ -120,9 +120,9 @@ class VnwRestClient
      * @param array $queryString
      * @return \stdClass
      */
-    public function get($endpointUrl, $accessToken = '' ,$queryString = array())
+    public function get($endpointUrl, $accessToken = '', $queryString = array(), $headers = array())
     {
-        return $this->send('GET',$endpointUrl.'?'.http_build_query($queryString) , $accessToken);
+        return $this->send('GET', $endpointUrl . '?' . http_build_query($queryString), $accessToken, null, $headers);
     }
 
     /**
@@ -135,17 +135,17 @@ class VnwRestClient
     public function post($endpointUrl, $accessToken, $postData = array(), $files = array(), $headers = array())
     {
         $postDataMultipart = [];
-        $postDataMultipart[]=array(
-            'name'=>'json',
-            'contents'=>json_encode($postData)
+        $postDataMultipart[] = array(
+            'name' => 'json',
+            'contents' => json_encode($postData)
         );
 
         $body['json'] = json_encode($postData);
         if (!empty($files)) {
-            $postDataMultipart[]=array(
-                'name'=>$files['name'],
-                'contents'=> fopen($files['file'], 'r'),
-                'filename'=>$files['file_name']
+            $postDataMultipart[] = array(
+                'name' => $files['name'],
+                'contents' => fopen($files['file'], 'r'),
+                'filename' => $files['file_name']
             );
         }
 
@@ -161,7 +161,7 @@ class VnwRestClient
      */
     public function postRequest($endpointUrl, $accessToken, $postData = array(), $files = array(), $headers = array())
     {
-        if(empty($headers)) {
+        if (empty($headers)) {
             $headers = array('Content-Type' => 'application/json');
         }
 
@@ -187,16 +187,16 @@ class VnwRestClient
         if ($httpResponseCode == 200) {
             // return response data as json if possible, raw if not
             $result->http_response_body = $data && $jsonResponseData === null ? $data : $jsonResponseData;
-        }elseif ($httpResponseCode == 400) {
-            throw new MissingRequiredParameters(ExceptionMessages::EXCEPTION_MISSING_REQUIRED_PARAMETERS.$this->getResponseExceptionMessage($response));
+        } elseif ($httpResponseCode == 400) {
+            throw new MissingRequiredParameters(ExceptionMessages::EXCEPTION_MISSING_REQUIRED_PARAMETERS . $this->getResponseExceptionMessage($response));
         } elseif ($httpResponseCode == 401) {
-            if($jsonResponseData->error=='invalid_grant'){
+            if ($jsonResponseData->error == 'invalid_grant') {
                 throw new ExpiredToken(ExceptionMessages::EXCEPTION_INVALID_CREDENTIALS);
-            }else{
+            } else {
                 throw new InvalidCredentials(ExceptionMessages::EXCEPTION_INVALID_CREDENTIALS);
             }
         } elseif ($httpResponseCode == 404) {
-            throw new MissingEndpoint(ExceptionMessages::EXCEPTION_MISSING_ENDPOINT.$this->getResponseExceptionMessage($response));
+            throw new MissingEndpoint(ExceptionMessages::EXCEPTION_MISSING_ENDPOINT . $this->getResponseExceptionMessage($response));
         } else {
             throw new GenericHTTPError(ExceptionMessages::EXCEPTION_GENERIC_HTTP_ERROR, $httpResponseCode, $response->getBody());
         }
@@ -216,7 +216,7 @@ class VnwRestClient
         $body = (string) $responseObj->getBody();
         $response = json_decode($body);
         if (json_last_error() == JSON_ERROR_NONE && isset($response->message)) {
-            return ' '.$response->message;
+            return ' ' . $response->message;
         }
     }
 
@@ -226,10 +226,6 @@ class VnwRestClient
      */
     protected function getHttpClient()
     {
-        if ($this->httpClient === null) {
-            $this->httpClient = HttpClientDiscovery::find();
-        }
-
         return $this->httpClient;
     }
 
@@ -274,7 +270,7 @@ class VnwRestClient
      */
     private function getApiUrl($uri)
     {
-        return $this->generateEndpoint($this->apiHost, $this->apiVersion, $this->sslEnabled).$uri;
+        return $this->generateEndpoint($this->apiHost, $this->apiVersion, $this->sslEnabled) . $uri;
     }
 
 
@@ -288,9 +284,9 @@ class VnwRestClient
     private function generateEndpoint($apiEndpoint, $apiVersion, $ssl)
     {
         if (!$ssl) {
-            return 'http://'.$apiEndpoint.'/';
+            return 'http://' . $apiEndpoint . '/';
         } else {
-            return 'https://'.$apiEndpoint.'/';
+            return 'https://' . $apiEndpoint . '/';
         }
     }
 
@@ -309,5 +305,4 @@ class VnwRestClient
     {
         $this->tokenStorage = $tokenStorage;
     }
-
 }
