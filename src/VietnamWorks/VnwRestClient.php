@@ -178,7 +178,7 @@ class VnwRestClient
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      */
-    private function responseHandler(CurlResponse $response)
+    private function responseHandler(TraceableResponse $response)
     {
         $httpResponseCode = $response->getStatusCode();
         $result = new \stdClass();
