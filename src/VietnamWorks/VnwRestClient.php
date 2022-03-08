@@ -8,6 +8,7 @@ use Http\Client\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpClient\Response\CurlResponse;
 use Symfony\Component\HttpClient\Response\TraceableResponse;
 use VietnamWorks\Constants\ExceptionMessages;
 use VietnamWorks\Exceptions\ExpiredToken;
@@ -177,7 +178,7 @@ class VnwRestClient
      * @throws MissingEndpoint
      * @throws MissingRequiredParameters
      */
-    private function responseHandler(TraceableResponse $response)
+    private function responseHandler(CurlResponse $response)
     {
         $httpResponseCode = $response->getStatusCode();
         $result = new \stdClass();
