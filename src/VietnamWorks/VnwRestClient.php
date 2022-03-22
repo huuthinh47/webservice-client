@@ -6,7 +6,6 @@ use GuzzleHttp\Psr7\MultipartStream;
 use Http\Client\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\HttpClient\Response\CurlResponse;
 use Symfony\Component\HttpClient\Response\TraceableResponse;
 use VietnamWorks\Constants\ExceptionMessages;
 use VietnamWorks\Exceptions\ExpiredToken;
