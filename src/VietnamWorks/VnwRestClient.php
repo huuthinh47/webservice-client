@@ -104,6 +104,10 @@ class VnwRestClient
             'headers' => $headers
         ]);
 
+        if ($body) {
+            $options['body'] = $body;
+        }
+
         $response = $client->request(
             $method,
             $this->getApiUrl($uri),
